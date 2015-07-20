@@ -1,6 +1,6 @@
 {
-  "name": "notification",
-  "version": "1.0.0",
+  "name": "notificate",
+  "version": "1.0.2",
   "homepage": "https://github.com/pinguo-luozhong/notification",
   "main": "dist/notification.min.js",
   "authors": [
