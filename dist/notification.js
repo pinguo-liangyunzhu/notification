@@ -10,11 +10,23 @@ var NotificationClass = function(){
 			return [false, "notifyName must be a String"];
 		}
 
-		if (!NotifyCenter) { 
+		if (!NotifyCenter) {
 			return [false, "NotifyCenter not been instantiated"];
 		}
 
 		return [true, notifyName + " create success"];
+	};
+
+	this.createNotify = function(notifyName){
+		if (!this.notifyActions[notifyName]) {
+			this.notifyActions[notifyName] = Reflux.createAction();
+			this.notifyActions[notifyName].observers = [];
+			this.notifyActions[notifyName].listen(function(notifyEntity){
+				for(var i=0; i<this.observers.length; i++){
+					this.observers[i](notifyEntity);
+				};
+			});
+		}
 	};
 };
 
@@ -26,28 +38,13 @@ NotificationClass.init = function(){
 	return NotifyCenter;
 };
 
-NotificationClass.prototype.createNotify = function(notifyName){
-
-	var checkResult = this.checkName(notifyName);
-	if (!checkResult[0]) {
-		return checkResult;
-	}else{
-		this.notifyActions[notifyName] = Reflux.createAction();
-		this.notifyActions[notifyName].observers = [];
-		this.notifyActions[notifyName].listen(function(notifyEntity){
-			for(var i=0; i<this.observers.length; i++){
-				this.observers[i](notifyEntity);
-			};
-		});
-	}
-};
-
 NotificationClass.prototype.post = function(notifyName, param){
 
 	var checkResult = this.checkName(notifyName);
 	if (!checkResult[0]) {
 		return checkResult;
 	}else{
+		this.createNotify(notifyName);
 		param = param || {};
 		this.notifyActions[notifyName](param);
 	}
@@ -56,7 +53,8 @@ NotificationClass.prototype.post = function(notifyName, param){
 NotificationClass.prototype.addObserver = function(notifyName, callback){
 
 	var checkResult = this.checkName(notifyName);
-	if (checkResult[0] && this.notifyActions[notifyName] && callback instanceof Function) {
+	if (checkResult[0] && callback instanceof Function) {
+		this.createNotify(notifyName);
 		this.notifyActions[notifyName].observers.push(callback);
 	}
 };
